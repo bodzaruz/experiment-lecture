@@ -28,9 +28,11 @@
     // 1. KONFIGURACJA (Tu wkleisz dane ze swojego Supabase)
     const SUPABASE_URL = 'https://klaaepxuspbycxediqzi.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsYWFlcHh1c3BieWN4ZWRpcXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1Nzc3MzMsImV4cCI6MjA4NjE1MzczM30.-LD9-PIMu86OcGvgs_1VxuQyqBKBXCOZGic2JPLaVXo';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // 2. GENEROWANIE ID
+    
+    // 2. INICJACJA (Zmieniona nazwa zmiennej na supabaseClient)
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+    // 3. GENEROWANIE ID (To sprawi, że kropki znikną i pojawi się numer użytkownika)
     let userId = localStorage.getItem('stat_user_id');
     if (!userId) {
         userId = 'U-' + Math.random().toString(36).substr(2, 9).toUpperCase();
@@ -49,7 +51,7 @@
         btn.disabled = true;
         status.innerText = "Wysyłanie...";
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('responses') // tak musi się nazywać tabela w bazie
             .insert([{ user_id: userId, answer: parseFloat(answer) }]);
 
