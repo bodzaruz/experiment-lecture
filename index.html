@@ -1,1 +1,67 @@
-GUCIO
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eksperyment Statystyczny</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f0f2f5; }
+        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; width: 80%; max-width: 400px; }
+        input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 1rem; box-sizing: border-box; }
+        button { background: #0070f3; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 1rem; width: 100%; }
+        button:disabled { background: #ccc; }
+        #status { margin-top: 15px; font-size: 0.9rem; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Weź udział w badaniu</h2>
+    <p>Twoje ID: <strong id="user-id">...</strong></p>
+    <input type="number" id="answer" placeholder="Wpisz Twoją liczbę/odpowiedź">
+    <button onclick="sendData()" id="btn-send">Wyślij odpowiedź</button>
+    <div id="status"></div>
+</div>
+
+<script>
+    // 1. KONFIGURACJA (Tu wkleisz dane ze swojego Supabase)
+    const SUPABASE_URL = 'TWOJ_URL_Z_SUPABASE';
+    const SUPABASE_KEY = 'TWOJ_KLUCZ_Z_SUPABASE';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 2. GENEROWANIE ID
+    let userId = localStorage.getItem('stat_user_id');
+    if (!userId) {
+        userId = 'U-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        localStorage.setItem('stat_user_id', userId);
+    }
+    document.getElementById('user-id').innerText = userId;
+
+    // 3. WYSYŁANIE DANYCH
+    async function sendData() {
+        const answer = document.getElementById('answer').value;
+        const status = document.getElementById('status');
+        const btn = document.getElementById('btn-send');
+
+        if (!answer) return alert("Wpisz najpierw liczbę!");
+
+        btn.disabled = true;
+        status.innerText = "Wysyłanie...";
+
+        const { error } = await supabase
+            .from('responses') // tak musi się nazywać tabela w bazie
+            .insert([{ user_id: userId, answer: parseFloat(answer) }]);
+
+        if (error) {
+            status.innerText = "Błąd: " + error.message;
+            btn.disabled = false;
+        } else {
+            status.innerText = "Dziękujemy! Odpowiedź zapisana.";
+            btn.style.background = "#28a745";
+        }
+    }
+</script>
+
+</body>
+</html>
